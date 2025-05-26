@@ -7,7 +7,7 @@ A complete VPN sales and management system with representative management, invoi
 To install the complete system on a fresh Ubuntu 22.04 server, run:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/Iscgrou/billi/master/scripts/quick-install.sh | sudo bash
+curl -sSL https://raw.githubusercontent.com/Iscgrou/billi/master/install.sh | sudo bash
 ```
 
 This will:
