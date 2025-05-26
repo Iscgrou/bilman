@@ -128,3 +128,18 @@ tar xzf vpn-manager-YYYYMMDD-HHMMSS.tar.gz
 systemctl start vpn-manager
 docker-compose up -d
 systemctl restart nginx
+
+## Quick Installation
+
+To install the complete system with a single command, run:
+
+```bash
+curl -sSL https://raw.githubusercontent.com/Iscgrou/billi/main/scripts/quick-install.sh | sudo bash
+```
+
+This will:
+- Clone the repository
+- Install all dependencies
+- Set up SSL certificates
+- Configure the system
+- Create admin user
