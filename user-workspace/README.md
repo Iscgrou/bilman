@@ -1,56 +1,78 @@
-# VPN Reseller Billing & Management Suite
+# VPN Management System
 
-This project is a comprehensive web application for managing VPN reseller billing, representatives, invoices, and accounting. It is built with Next.js, React, Tailwind CSS, and TypeScript, with a Persian RTL user interface.
+A complete VPN sales and management system with representative management, invoicing, and payment tracking.
+
+## Quick Installation
+
+To install the complete system on a fresh Ubuntu 22.04 server, run:
+
+```bash
+curl -sSL https://raw.githubusercontent.com/Iscgrou/billi/master/scripts/quick-install.sh | sudo bash
+```
+
+This will:
+- Update your system
+- Install all dependencies
+- Set up SSL certificates
+- Configure the system
+- Create admin user
+
+## Manual Installation
+
+If you prefer to install manually, follow these steps:
+
+1. Clone the repository:
+```bash
+git clone https://github.com/Iscgrou/billi.git /opt/vpn-manager
+cd /opt/vpn-manager
+```
+
+2. Run the installation script:
+```bash
+sudo ./scripts/install.sh
+```
+
+## System Updates
+
+To update the system:
+```bash
+sudo /opt/vpn-manager/scripts/update.sh
+```
+
+## Backups
+
+To create a backup:
+```bash
+sudo /opt/vpn-manager/scripts/backup.sh
+```
+
+Backups are stored in `/opt/vpn-manager/backups` and are automatically created daily at 2 AM.
 
 ## Features
 
-- User authentication with JWT and bcrypt
-- Representative management with CRUD operations
-- Invoice management with import and PDF generation
-- Accounting and payment logging
-- Representative referral hierarchy visualization
-- Payment history logs
-- Invoice status management
-- Responsive and modern Persian RTL UI with Tailwind CSS
+- Representative management
+- Invoice generation and tracking
+- Payment processing
+- Telegram bot integration
+- Multi-language support (Persian/English)
+- Automated backups
+- SSL encryption
+- Docker containerization
 
-## Setup
+## Requirements
 
-1. Install dependencies:
+- Ubuntu 22.04 LTS
+- Domain name pointing to your server
+- Open ports: 22 (SSH), 80 (HTTP), 443 (HTTPS)
 
-```bash
-npm install
-```
+## Security
 
-2. Run the development server:
+- All traffic is encrypted with SSL
+- Regular security updates
+- Automated backups
+- Role-based access control
+- Secure password storage
 
-```bash
-npm run dev
-```
+## Support
 
-3. Access the app at `http://localhost:3000`
-
-## Docker
-
-Build and run with Docker:
-
-```bash
-docker-compose up --build
-```
-
-## Project Structure
-
-- `src/app`: Frontend pages and components
-- `src/pages/api`: Backend API routes
-- `src/lib`: Utility libraries (i18n, auth)
-- `Dockerfile`, `docker-compose.yml`: Containerization setup
-
-## Next Steps
-
-- Integration testing
-- Deployment setup
-- User acceptance testing
-- Feature enhancements and bug fixes
-
-## License
-
-MIT License
+For issues and feature requests, please create an issue in the repository.
