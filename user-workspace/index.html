@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سیستم مدیریت فروش VPN</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+        }
+        .gradient-text {
+            background: linear-gradient(45deg, #3B82F6, #60A5FA);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hover-scale {
+            transition: transform 0.3s ease;
+        }
+        .hover-scale:hover {
+            transform: scale(1.05);
+        }
+        .hero-section {
+            background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%);
+        }
+    </style>
+</head>
+<body class="bg-[#0F172A] text-white">
+    <!-- Header -->
+    <header class="fixed w-full top-0 z-50 bg-[#0F172A]/95 backdrop-blur-sm">
+        <nav class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="text-2xl font-bold gradient-text">⚡ VPN مدیریت</div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#features" class="hover:text-blue-500 transition-colors">امکانات</a>
+                    <a href="#services" class="hover:text-blue-500 transition-colors">ویژگی‌ها</a>
+                    <a href="#contact" class="hover:text-blue-500 transition-colors">تماس</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-section min-h-screen flex items-center justify-center pt-16">
+        <div class="container mx-auto px-6 text-center relative z-10">
+            <h1 class="text-5xl md:text-7xl font-bold mb-6 gradient-text">
+                مدیریت فروش VPN
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-300 mb-8 max-w-2xl mx-auto">
+                سیستم جامع مدیریت نمایندگان، صورتحساب‌ها و پرداخت‌های VPN
+            </p>
+            <a href="login.html" class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg text-lg font-semibold transition-all hover:scale-105 shadow-lg shadow-blue-500/20">
+                ورود به سیستم
+            </a>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20">
+        <div class="container mx-auto px-6">
+            <h2 class="text-4xl font-bold text-center mb-16 gradient-text">امکانات سیستم</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-[#1E293B] p-8 rounded-xl hover-scale shadow-lg">
+                    <div class="text-blue-500 text-4xl mb-4"><i class="fas fa-users"></i></div>
+                    <h3 class="text-xl font-semibold mb-4">مدیریت نمایندگان</h3>
+                    <p class="text-gray-400">ثبت و مدیریت اطلاعات نمایندگان فروش VPN</p>
+                </div>
+                <div class="bg-[#1E293B] p-8 rounded-xl hover-scale shadow-lg">
+                    <div class="text-blue-500 text-4xl mb-4"><i class="fas fa-file-invoice"></i></div>
+                    <h3 class="text-xl font-semibold mb-4">صورتحساب‌ها</h3>
+                    <p class="text-gray-400">صدور و پیگیری صورتحساب‌های نمایندگان</p>
+                </div>
+                <div class="bg-[#1E293B] p-8 rounded-xl hover-scale shadow-lg">
+                    <div class="text-blue-500 text-4xl mb-4"><i class="fas fa-money-bill-wave"></i></div>
+                    <h3 class="text-xl font-semibold mb-4">مدیریت پرداخت‌ها</h3>
+                    <p class="text-gray-400">ثبت و پیگیری پرداخت‌های نمایندگان</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="py-20 bg-[#1E293B]">
+        <div class="container mx-auto px-6">
+            <h2 class="text-4xl font-bold text-center mb-16 gradient-text">ویژگی‌های سیستم</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-[#0F172A] p-8 rounded-xl hover-scale shadow-lg">
+                    <div class="text-blue-500 text-4xl mb-4"><i class="fas fa-tachometer-alt"></i></div>
+                    <h3 class="text-xl font-semibold mb-4">داشبورد مدیریتی</h3>
+                    <p class="text-gray-400">مشاهده گزارشات و آمار فروش در یک نگاه</p>
+                </div>
+                <div class="bg-[#0F172A] p-8 rounded-xl hover-scale shadow-lg">
+                    <div class="text-blue-500 text-4xl mb-4"><i class="fas fa-robot"></i></div>
+                    <h3 class="text-xl font-semibold mb-4">ربات تلگرام</h3>
+                    <p class="text-gray-400">مدیریت خودکار فروش از طریق ربات تلگرام</p>
+                </div>
+                <div class="bg-[#0F172A] p-8 rounded-xl hover-scale shadow-lg">
+                    <div class="text-blue-500 text-4xl mb-4"><i class="fas fa-chart-pie"></i></div>
+                    <h3 class="text-xl font-semibold mb-4">گزارشات تحلیلی</h3>
+                    <p class="text-gray-400">تحلیل عملکرد نمایندگان و وضعیت فروش</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 bg-[#0F172A]">
+        <div class="container mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4 gradient-text">⚡ VPN مدیریت</h3>
+                    <p class="text-gray-400">سیستم جامع مدیریت فروش VPN</p>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">دسترسی سریع</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#features" class="hover:text-blue-500">امکانات</a></li>
+                        <li><a href="#services" class="hover:text-blue-500">ویژگی‌ها</a></li>
+                        <li><a href="#contact" class="hover:text-blue-500">تماس</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">تماس با ما</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li>info@vpnmanager.com</li>
+                        <li>۰۲۱-۱۲۳۴۵۶۷۸</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">شبکه‌های اجتماعی</h4>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-blue-500 text-xl">
+                            <i class="fab fa-telegram"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-blue-500 text-xl">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-blue-500 text-xl">
+                            <i class="fab fa-whatsapp"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
+                <p>© ۱۴۰۲ سیستم مدیریت VPN. تمامی حقوق محفوظ است.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
