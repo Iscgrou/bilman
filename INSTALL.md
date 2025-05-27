@@ -11,11 +11,9 @@
 ### 1. Initial Setup
 
 ```bash
-# Create installation directory
-sudo mkdir -p /opt/vpn-manager
-
-# Clone the repository
-git clone https://github.com/Iscgrou/bilman.git /opt/vpn-manager
+# Create installation directory and clone repository
+sudo rm -rf /opt/vpn-manager
+sudo git clone https://github.com/Iscgrou/bilman.git /opt/vpn-manager
 cd /opt/vpn-manager
 ```
 
@@ -45,6 +43,7 @@ sudo chmod +x /usr/local/bin/docker-compose
 sudo ufw allow 22
 sudo ufw allow 80
 sudo ufw allow 443
+sudo ufw allow 3000
 sudo ufw --force enable
 ```
 
@@ -52,16 +51,16 @@ sudo ufw --force enable
 
 ```bash
 # Set proper permissions
-sudo chown -R root:root /opt/vpn-manager
+cd /opt/vpn-manager
+sudo chown -R root:root .
 
 # Create environment file
-sudo tee /opt/vpn-manager/.env << EOL
+sudo tee .env << EOL
 DOMAIN=shire.marfanet.com
 NODE_ENV=production
 EOL
 
 # Install dependencies
-cd /opt/vpn-manager
 sudo npm install
 
 # Build the application
@@ -71,10 +70,15 @@ sudo npm run build
 ### 5. Docker Setup
 
 ```bash
+# Stop any existing containers
+sudo docker-compose down
+
 # Build and start Docker containers
-cd /opt/vpn-manager
-sudo docker-compose build
+sudo docker-compose build --no-cache
 sudo docker-compose up -d
+
+# Verify containers are running
+sudo docker ps
 ```
 
 ### 6. Configure Nginx
@@ -93,12 +97,14 @@ server {
         proxy_set_header Connection 'upgrade';
         proxy_set_header Host $host;
         proxy_cache_bypass $http_upgrade;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     }
 }
 EOL
 
 # Enable site configuration
-sudo ln -s /etc/nginx/sites-available/shire.marfanet.com /etc/nginx/sites-enabled/
+sudo ln -sf /etc/nginx/sites-available/shire.marfanet.com /etc/nginx/sites-enabled/
 sudo rm -f /etc/nginx/sites-enabled/default
 sudo nginx -t && sudo systemctl restart nginx
 ```
@@ -126,6 +132,7 @@ WorkingDirectory=/opt/vpn-manager
 ExecStart=/usr/bin/npm start
 Restart=always
 Environment=NODE_ENV=production
+Environment=PORT=3000
 
 [Install]
 WantedBy=multi-user.target
@@ -148,22 +155,24 @@ sudo docker ps
 
 # Check application logs
 sudo journalctl -u vpn-manager -f
+
+# Check Nginx status
+sudo systemctl status nginx
 ```
 
 ## Troubleshooting
 
 If you encounter issues:
 
-1. Check if Node.js application is running:
+1. Check application logs:
 ```bash
-sudo systemctl status vpn-manager
 sudo journalctl -u vpn-manager -f
+sudo docker-compose logs -f
 ```
 
-2. Check Docker containers:
+2. Verify ports are open:
 ```bash
-sudo docker ps
-sudo docker-compose logs
+sudo netstat -tulpn | grep '3000\|80\|443'
 ```
 
 3. Check Nginx configuration:
@@ -172,16 +181,24 @@ sudo nginx -t
 sudo tail -f /var/log/nginx/error.log
 ```
 
-4. Verify ports are open:
-```bash
-sudo netstat -tulpn | grep '3000\|80\|443'
-```
-
-5. Restart services:
+4. Restart services:
 ```bash
 sudo systemctl restart vpn-manager
 sudo systemctl restart nginx
 sudo docker-compose restart
+```
+
+5. Clean installation:
+```bash
+# Stop all services
+sudo systemctl stop vpn-manager
+sudo docker-compose down
+sudo systemctl stop nginx
+
+# Remove existing files
+sudo rm -rf /opt/vpn-manager
+
+# Start fresh installation from step 1
 ```
 
 ## Important Notes
