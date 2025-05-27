@@ -1,63 +1,101 @@
-import { NextResponse } from 'next/server';
-import { sign } from 'jsonwebtoken';
-import { cookies } from 'next/headers';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
-
-// In a real application, you would validate against a database
-const MOCK_USERS = [
-  {
-    username: 'admin',
-    password: 'admin123',
-    role: 'admin'
-  },
-  {
-    username: 'operator',
-    password: 'operator123',
-    role: 'operator'
-  }
-];
+import { NextResponse } from 'next/server'
+import bcrypt from 'bcryptjs'
+import { prisma } from '@/lib/prisma'
+import { sign } from 'jsonwebtoken'
+import { generateCsrfToken, verifyCsrfToken, rateLimitMiddleware } from '@/lib/security'
 
 export async function POST(request: Request) {
-  try {
-    const body = await request.json();
-    const { username, password } = body;
+  // Check rate limiting
+  const rateLimitResponse = await rateLimitMiddleware(request as any)
+  if (rateLimitResponse) return rateLimitResponse
 
-    const user = MOCK_USERS.find(
-      (u) => u.username === username && u.password === password
-    );
+  // Verify CSRF token
+  const csrfToken = request.headers.get('x-csrf-token')
+  const csrfSecret = request.headers.get('x-csrf-secret')
+
+  if (!csrfToken || !csrfSecret || !verifyCsrfToken(csrfSecret, csrfToken)) {
+    return NextResponse.json(
+      { message: 'Invalid CSRF token' },
+      { status: 403 }
+    )
+  }
+
+  try {
+    const { username, password, rememberMe } = await request.json()
+
+    const user = await prisma.user.findUnique({
+      where: { username },
+    })
 
     if (!user) {
       return NextResponse.json(
-        { message: 'نام کاربری یا رمز عبور اشتباه است.' },
+        { message: 'Invalid credentials' },
         { status: 401 }
-      );
+      )
     }
 
-    // Create JWT token
-    const token = sign(
-      { username: user.username, role: user.role },
-      JWT_SECRET,
-      { expiresIn: '1d' }
-    );
+    const isValidPassword = await bcrypt.compare(password, user.password)
 
-    // Set cookie
-    cookies().set('token', token, {
+    if (!isValidPassword) {
+      return NextResponse.json(
+        { message: 'Invalid credentials' },
+        { status: 401 }
+      )
+    }
+
+    // Create JWT token with dynamic expiration
+    const expiresIn = rememberMe ? '30d' : '1d'
+    const token = sign(
+      { 
+        id: user.id, 
+        username: user.username,
+        role: user.role 
+      },
+      process.env.JWT_SECRET || 'fallback-secret',
+      { expiresIn }
+    )
+
+    // Generate new CSRF token for the session
+    const { secret: newSecret, token: newCsrfToken } = generateCsrfToken()
+
+    const response = NextResponse.json(
+      { 
+        message: 'Login successful',
+        csrfToken: newCsrfToken,
+        user: {
+          id: user.id,
+          username: user.username,
+          role: user.role
+        }
+      },
+      { status: 200 }
+    )
+
+    // Set cookies
+    const maxAge = rememberMe ? 30 * 24 * 60 * 60 : 24 * 60 * 60 // 30 days or 1 day
+    
+    response.cookies.set('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 86400 // 1 day
-    });
+      maxAge,
+      path: '/',
+    })
 
-    return NextResponse.json(
-      { message: 'ورود موفقیت‌آمیز' },
-      { status: 200 }
-    );
+    response.cookies.set('csrf_secret', newSecret, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge,
+      path: '/',
+    })
+
+    return response
   } catch (error) {
-    console.error('Login error:', error);
+    console.error('Login error:', error)
     return NextResponse.json(
-      { message: 'خطای سرور' },
+      { message: 'Internal server error' },
       { status: 500 }
-    );
+    )
   }
 }

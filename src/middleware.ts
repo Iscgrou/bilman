@@ -1,47 +1,102 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
-import { verifyToken } from './lib/auth';
-import { UserRole } from './lib/roles';
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+import { verify } from 'jsonwebtoken'
+import { verifyCsrfToken } from '@/lib/security'
 
-const protectedPaths = [
-  { path: '/accounting', roles: [UserRole.Admin, UserRole.Operator] },
-  { path: '/representatives', roles: [UserRole.Admin, UserRole.Operator] },
-  // Add more protected paths and roles as needed
-];
+interface JWTPayload {
+  id: string
+  username: string
+  role: string
+}
+
+// Define route access based on roles
+const routeAccess = {
+  '/dashboard': ['ADMIN', 'OPERATOR', 'REPRESENTATIVE'],
+  '/representatives': ['ADMIN', 'OPERATOR'],
+  '/invoices': ['ADMIN', 'OPERATOR', 'REPRESENTATIVE'],
+  '/accounting': ['ADMIN'],
+  '/settings': ['ADMIN'],
+}
+
+const protectedRoutes = Object.keys(routeAccess)
+const authRoutes = ['/login']
+const publicRoutes = ['/api/auth/login']
 
 export async function middleware(request: NextRequest) {
-  const token = request.cookies.get('token')?.value;
+  const { pathname } = request.nextUrl
 
-  const url = request.nextUrl.clone();
-
-  // Allow public paths
-  if (url.pathname.startsWith('/login') || url.pathname.startsWith('/api/auth')) {
-    return NextResponse.next();
+  // Allow public routes
+  if (publicRoutes.includes(pathname)) {
+    return NextResponse.next()
   }
 
-  if (!token || !verifyToken(token)) {
-    url.pathname = '/login';
-    return NextResponse.redirect(url);
+  const token = request.cookies.get('token')?.value
+  const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
+  const isAuthRoute = authRoutes.some(route => pathname.startsWith(route))
+
+  // If no token and trying to access protected route
+  if (!token && isProtectedRoute) {
+    const url = new URL('/login', request.url)
+    url.searchParams.set('from', pathname)
+    return NextResponse.redirect(url)
   }
 
-  // Extract user role from token payload (assuming verifyToken returns decoded token)
-  const decodedToken = verifyToken(token);
-  const userRole = typeof decodedToken === 'object' && decodedToken !== null && 'role' in decodedToken
-    ? (decodedToken.role as UserRole)
-    : null;
+  // If has token and trying to access auth routes
+  if (token && isAuthRoute) {
+    return NextResponse.redirect(new URL('/dashboard', request.url))
+  }
 
-  for (const protectedPath of protectedPaths) {
-    if (url.pathname.startsWith(protectedPath.path)) {
-      if (!userRole || !protectedPath.roles.includes(userRole)) {
-        url.pathname = '/unauthorized';
-        return NextResponse.redirect(url);
+  // For protected routes, verify token and check role-based access
+  if (isProtectedRoute && token) {
+    try {
+      // Verify JWT token
+      const decoded = verify(
+        token,
+        process.env.JWT_SECRET || 'fallback-secret'
+      ) as JWTPayload
+
+      // Check CSRF token for API routes
+      if (pathname.startsWith('/api/')) {
+        const csrfToken = request.headers.get('x-csrf-token')
+        const csrfSecret = request.cookies.get('csrf_secret')?.value
+
+        if (!csrfToken || !csrfSecret || !verifyCsrfToken(csrfSecret, csrfToken)) {
+          return NextResponse.json(
+            { message: 'Invalid CSRF token' },
+            { status: 403 }
+          )
+        }
       }
+
+      // Check role-based access
+      const routeRoles = routeAccess[pathname as keyof typeof routeAccess]
+      if (routeRoles && !routeRoles.includes(decoded.role)) {
+        // Redirect to dashboard if user doesn't have access
+        return NextResponse.redirect(new URL('/dashboard', request.url))
+      }
+
+      return NextResponse.next()
+    } catch (error) {
+      // If token is invalid, clear it and redirect to login
+      const response = NextResponse.redirect(new URL('/login', request.url))
+      response.cookies.delete('token')
+      response.cookies.delete('csrf_secret')
+      return response
     }
   }
 
-  return NextResponse.next();
+  return NextResponse.next()
 }
 
 export const config = {
-  matcher: ['/', '/representatives/:path*', '/invoices/:path*', '/accounting/:path*', '/settings/:path*'],
-};
+  matcher: [
+    // Match all protected routes and auth routes
+    '/dashboard/:path*',
+    '/representatives/:path*',
+    '/invoices/:path*',
+    '/accounting/:path*',
+    '/settings/:path*',
+    '/login',
+    '/api/auth/:path*',
+  ],
+}
