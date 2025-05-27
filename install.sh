@@ -22,16 +22,8 @@ warning() {
 # Check if running as root
 if [[ $EUID -ne 0 ]]; then
    error "This script must be run as root"
-   error "Please run: sudo curl -sSL https://raw.githubusercontent.com/Iscgrou/billi/main/install.sh | sudo bash -s your-domain.com"
+   error "Please run: sudo curl -sSL https://raw.githubusercontent.com/Iscgrou/billi/main/install.sh | sudo bash"
    exit 1
-fi
-
-# Get domain name from command line argument
-DOMAIN_NAME=$1
-if [ -z "$DOMAIN_NAME" ]; then
-    error "Domain name is required"
-    error "Usage: sudo bash install.sh your-domain.com"
-    exit 1
 fi
 
 # Get installation directory
@@ -43,6 +35,10 @@ echo "================================================"
 echo "   VPN Management System - Quick Installation"
 echo "================================================"
 echo
+
+# Use provided domain name or prompt
+DOMAIN_NAME="shire.marfanet.com"
+echo "Using domain name: $DOMAIN_NAME"
 
 # Get admin credentials
 read -p "Enter admin username: " ADMIN_USER
