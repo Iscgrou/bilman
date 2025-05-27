@@ -1,19 +1,26 @@
-# Manual Installation Steps
+# Complete Manual Installation Guide
 
 ## Prerequisites
+- Ubuntu/Debian server
 - Domain name pointing to your server
-- Root access to the server
+- Root access
 - Basic Linux knowledge
 
 ## Installation Steps
 
-1. Clone the repository:
+### 1. Initial Setup
+
 ```bash
+# Create installation directory
+sudo mkdir -p /opt/vpn-manager
+
+# Clone the repository
 git clone https://github.com/Iscgrou/bilman.git /opt/vpn-manager
 cd /opt/vpn-manager
 ```
 
-2. System Requirements Installation:
+### 2. System Requirements
+
 ```bash
 # Update system packages
 sudo apt-get update && sudo apt-get upgrade -y
@@ -31,38 +38,42 @@ sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-
 sudo chmod +x /usr/local/bin/docker-compose
 ```
 
-3. Configure Firewall:
+### 3. Configure Firewall
+
 ```bash
+# Allow necessary ports
 sudo ufw allow 22
 sudo ufw allow 80
 sudo ufw allow 443
 sudo ufw --force enable
 ```
 
-4. Configure Environment:
+### 4. Application Setup
+
 ```bash
-# Create .env file
-cat > .env << EOL
+# Set proper permissions
+sudo chown -R root:root /opt/vpn-manager
+
+# Create environment file
+sudo tee /opt/vpn-manager/.env << EOL
 DOMAIN=shire.marfanet.com
 NODE_ENV=production
 EOL
-```
 
-5. Install Dependencies and Build:
-```bash
-npm install
-npm run build
-```
+# Install dependencies and build
+cd /opt/vpn-manager
+sudo npm install
+sudo npm run build
 
-6. Start Docker Containers:
-```bash
+# Start Docker containers
 sudo docker-compose up -d
 ```
 
-7. Configure Nginx:
+### 5. Configure Nginx
+
 ```bash
 # Create Nginx configuration
-sudo tee /etc/nginx/sites-available/shire.marfanet.com > /dev/null << EOL
+sudo tee /etc/nginx/sites-available/shire.marfanet.com << EOL
 server {
     listen 80;
     server_name shire.marfanet.com;
@@ -84,14 +95,18 @@ sudo rm -f /etc/nginx/sites-enabled/default
 sudo nginx -t && sudo systemctl restart nginx
 ```
 
-8. Setup SSL with Certbot:
+### 6. SSL Configuration
+
 ```bash
+# Setup SSL with Certbot
 sudo certbot --nginx -d shire.marfanet.com --non-interactive --agree-tos --email admin@shire.marfanet.com --redirect
 ```
 
-9. Create and Enable Systemd Service:
+### 7. Service Configuration
+
 ```bash
-sudo tee /etc/systemd/system/vpn-manager.service > /dev/null << EOL
+# Create systemd service
+sudo tee /etc/systemd/system/vpn-manager.service << EOL
 [Unit]
 Description=VPN Manager
 After=network.target
@@ -108,20 +123,62 @@ Environment=NODE_ENV=production
 WantedBy=multi-user.target
 EOL
 
+# Enable and start service
 sudo systemctl daemon-reload
 sudo systemctl enable vpn-manager
 sudo systemctl start vpn-manager
 ```
 
-10. Setup Daily Backups:
+### 8. Setup Daily Backups
+
 ```bash
+# Configure backup cron job
 (sudo crontab -l 2>/dev/null; echo "0 2 * * * /opt/vpn-manager/scripts/backup.sh") | sudo crontab -
+```
+
+### 9. Verify Installation
+
+```bash
+# Check service status
+sudo systemctl status vpn-manager
+
+# Check Docker containers
+sudo docker ps
+
+# Check application logs
+sudo journalctl -u vpn-manager -f
+```
+
+## Troubleshooting
+
+If you encounter a 502 Bad Gateway error:
+
+1. Check service status:
+```bash
+sudo systemctl status vpn-manager
+```
+
+2. Check Docker containers:
+```bash
+sudo docker ps
+sudo docker-compose logs
+```
+
+3. Check Nginx configuration:
+```bash
+sudo nginx -t
+sudo tail -f /var/log/nginx/error.log
+```
+
+4. Restart services:
+```bash
+sudo systemctl restart vpn-manager
+sudo systemctl restart nginx
 ```
 
 ## Important Notes
 - Ensure your domain DNS (shire.marfanet.com) points to your server's IP address
-- Make sure ports 22, 80, and 443 are open on your server
 - Keep your credentials and environment variables secure
-- Regularly update the system using the update script: `sudo /opt/vpn-manager/scripts/update.sh`
+- Regularly update the system using: `sudo /opt/vpn-manager/scripts/update.sh`
 
-After installation, your VPN Management System will be accessible at https://shire.marfanet.com
+After completing all steps, your VPN Management System will be accessible at https://shire.marfanet.com
