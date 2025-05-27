@@ -4,6 +4,20 @@ A complete VPN sales and management system with representative management, invoi
 
 ## Quick Installation
 
+First, set up GitHub authentication:
+
+1. Generate a Personal Access Token:
+   - Go to GitHub Settings → Developer Settings → Personal Access Tokens
+   - Click "Generate new token (classic)"
+   - Select repo scope
+   - Copy the generated token
+
+2. Configure Git to use your token:
+```bash
+git config --global credential.helper store
+echo "https://YOUR_GITHUB_USERNAME:YOUR_TOKEN@github.com" > ~/.git-credentials
+```
+
 To install the complete system on a fresh Ubuntu 22.04 server, run:
 
 ```bash
@@ -23,9 +37,10 @@ This will:
 
 If you prefer to install in production manually, follow these steps:
 
-1. Clone the repository:
+1. Clone the repository (replace YOUR_GITHUB_USERNAME and YOUR_TOKEN):
 ```bash
-git clone https://github.com/Iscgrou/billi.git /opt/vpn-manager
+sudo mkdir -p /opt/vpn-manager
+sudo git clone https://YOUR_GITHUB_USERNAME:YOUR_TOKEN@github.com/Iscgrou/billi.git /opt/vpn-manager
 cd /opt/vpn-manager
 ```
 
@@ -38,11 +53,13 @@ sudo ./scripts/install.sh
 
 For local development:
 
-1. Clone the repository:
+1. Clone the repository (replace YOUR_GITHUB_USERNAME and YOUR_TOKEN):
 ```bash
-git clone https://github.com/Iscgrou/billi.git
+git clone https://YOUR_GITHUB_USERNAME:YOUR_TOKEN@github.com/Iscgrou/billi.git
 cd billi
 ```
+
+Note: If you haven't set up your GitHub token yet, follow the authentication setup steps at the top of this README.
 
 2. Install dependencies:
 ```bash
