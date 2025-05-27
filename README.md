@@ -1,134 +1,113 @@
 # VPN Management System
 
-A complete VPN sales and management system with representative management, invoicing, and payment tracking.
-
-## Quick Installation
-
-First, set up GitHub authentication:
-
-1. Generate a Personal Access Token:
-   - Go to GitHub Settings → Developer Settings → Personal Access Tokens
-   - Click "Generate new token (classic)"
-   - Select repo scope
-   - Copy the generated token
-
-2. Configure Git to use your token:
-```bash
-git config --global credential.helper store
-echo "https://YOUR_GITHUB_USERNAME:YOUR_TOKEN@github.com" > ~/.git-credentials
-```
-
-To install the complete system on a fresh Ubuntu 22.04 server, run:
-
-```bash
-curl -sSL https://raw.githubusercontent.com/Iscgrou/billi/master/install.sh | sudo bash
-```
-
-This will:
-- Update your system
-- Install all dependencies
-- Set up SSL certificates
-- Configure the system
-- Create admin user
-
-## Manual Installation
-
-### Production Installation
-
-If you prefer to install in production manually, follow these steps:
-
-1. Clone the repository (replace YOUR_GITHUB_USERNAME and YOUR_TOKEN):
-```bash
-sudo mkdir -p /opt/vpn-manager
-sudo git clone https://YOUR_GITHUB_USERNAME:YOUR_TOKEN@github.com/Iscgrou/billi.git /opt/vpn-manager
-cd /opt/vpn-manager
-```
-
-2. Run the installation script:
-```bash
-sudo ./scripts/install.sh
-```
-
-### Development Setup
-
-For local development:
-
-1. Clone the repository (replace YOUR_GITHUB_USERNAME and YOUR_TOKEN):
-```bash
-git clone https://YOUR_GITHUB_USERNAME:YOUR_TOKEN@github.com/Iscgrou/billi.git
-cd billi
-```
-
-Note: If you haven't set up your GitHub token yet, follow the authentication setup steps at the top of this README.
-
-2. Install dependencies:
-```bash
-npm install
-```
-
-3. Start the development server:
-```bash
-npm run dev
-```
-
-4. Open your browser and navigate to:
-```
-http://localhost:3000
-```
-
-#### Development Login Credentials
-
-For testing purposes, you can use these credentials:
-
-- Admin User:
-  - Username: admin
-  - Password: admin123
-
-- Operator User:
-  - Username: operator
-  - Password: operator123
-
-## System Updates
-
-To update the system:
-```bash
-sudo /opt/vpn-manager/scripts/update.sh
-```
-
-## Backups
-
-To create a backup:
-```bash
-sudo /opt/vpn-manager/scripts/backup.sh
-```
-
-Backups are stored in `/opt/vpn-manager/backups` and are automatically created daily at 2 AM.
+A modern web application for managing VPN services, built with Next.js 13, Prisma, and PostgreSQL.
 
 ## Features
 
-- Representative management
-- Invoice generation and tracking
-- Payment processing
-- Telegram bot integration
-- Multi-language support (Persian/English)
-- Automated backups
-- SSL encryption
-- Docker containerization
+- 🔐 Secure Authentication System
+- �� User Role Management (Admin, Operator, Representative)
+- 💰 Invoice and Payment Tracking
+- 📊 Analytics Dashboard
+- 🔄 Referral System
+- 🤖 Telegram Integration
+- 🌐 Multi-language Support (Persian/English)
+- 🔒 SSL Encryption
+- 🐳 Docker Containerization
+
+## Tech Stack
+
+- **Frontend**: Next.js 13, Tailwind CSS
+- **Backend**: Next.js API Routes
+- **Database**: PostgreSQL
+- **ORM**: Prisma
+- **Authentication**: NextAuth.js
+- **Deployment**: Docker
 
 ## Requirements
 
 - Ubuntu 22.04 LTS
-- Domain name pointing to your server
+- Node.js 18.x or later
+- PostgreSQL 14 or later
+- Domain name (for production)
 - Open ports: 22 (SSH), 80 (HTTP), 443 (HTTPS)
 
-## Security
+## Installation
 
-- All traffic is encrypted with SSL
-- Regular security updates
-- Automated backups
+For complete installation instructions, see [INSTALLATION.md](INSTALLATION.md).
+
+Quick start:
+```bash
+# Clone the repository
+git clone https://github.com/Iscgrou/bilman.git
+cd bilman
+
+# Install dependencies
+npm install
+
+# Set up environment
+cp .env.example .env
+# Edit .env with your configuration
+
+# Initialize database
+npx prisma migrate deploy
+npx prisma db seed
+
+# Start development server
+npm run dev
+```
+
+## Project Structure
+
+```
+├── prisma/               # Database schema and migrations
+├── src/
+│   ├── app/             # Next.js 13 app directory
+│   ├── components/      # Reusable UI components
+│   ├── contexts/        # React contexts
+│   └── lib/            # Utility functions and configurations
+├── public/             # Static assets
+└── docker/            # Docker configuration files
+```
+
+## Development
+
+Default development credentials:
+- Admin User:
+  - Username: admin
+  - Password: admin123 (change immediately)
+
+## Security Features
+
+- Secure password hashing with bcrypt
+- JWT-based authentication
 - Role-based access control
-- Secure password storage
+- Rate limiting on API routes
+- SSL encryption in production
+- Secure session management
+
+## Database Backups
+
+Automated daily backups at 2 AM:
+```bash
+# Manual backup
+pg_dump -U bilman_user bilman > backup.sql
+
+# Restore from backup
+psql -U bilman_user bilman < backup.sql
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## Support
 
 For issues and feature requests, please create an issue in the repository.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
