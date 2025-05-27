@@ -45,6 +45,7 @@ sudo ufw allow 80
 sudo ufw allow 443
 sudo ufw allow 3000
 sudo ufw --force enable
+sudo ufw reload
 ```
 
 ### 4. Application Setup
@@ -58,10 +59,14 @@ sudo chown -R root:root .
 sudo tee .env << EOL
 DOMAIN=shire.marfanet.com
 NODE_ENV=production
+PORT=3000
 EOL
 
-# Install dependencies
-sudo npm install
+# Clean installation
+sudo rm -rf .next node_modules package-lock.json
+
+# Install dependencies with legacy peer deps to avoid conflicts
+sudo npm install --legacy-peer-deps
 
 # Build the application
 sudo npm run build
@@ -70,6 +75,38 @@ sudo npm run build
 ### 5. Docker Setup
 
 ```bash
+# Create Docker Compose file
+sudo tee docker-compose.yml << EOL
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    volumes:
+      - .:/app
+    restart: always
+EOL
+
+# Create Dockerfile
+sudo tee Dockerfile << EOL
+FROM node:18-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm install --legacy-peer-deps
+
+COPY . .
+RUN npm run build
+
+EXPOSE 3000
+
+CMD ["npm", "start"]
+EOL
+
 # Stop any existing containers
 sudo docker-compose down
 
@@ -93,12 +130,12 @@ server {
     location / {
         proxy_pass http://localhost:3000;
         proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_cache_bypass \$http_upgrade;
     }
 }
 EOL
@@ -147,48 +184,65 @@ sudo systemctl start vpn-manager
 ### 9. Verify Installation
 
 ```bash
-# Check service status
+# Check all services
 sudo systemctl status vpn-manager
-
-# Check Docker containers
-sudo docker ps
-
-# Check application logs
-sudo journalctl -u vpn-manager -f
-
-# Check Nginx status
 sudo systemctl status nginx
+sudo docker ps
+sudo netstat -tulpn | grep '3000\|80\|443'
+
+# View logs
+sudo journalctl -u vpn-manager -f
+sudo docker-compose logs -f
+sudo tail -f /var/log/nginx/error.log
 ```
 
 ## Troubleshooting
 
-If you encounter issues:
-
-1. Check application logs:
+### 1. Next.js Build Issues
+If you encounter Next.js build errors:
 ```bash
-sudo journalctl -u vpn-manager -f
+# Clean installation and node_modules
+cd /opt/vpn-manager
+sudo rm -rf .next node_modules package-lock.json
+sudo npm install --legacy-peer-deps
+sudo npm run build
+```
+
+### 2. Docker Issues
+If Docker containers fail to start:
+```bash
+# Check Docker logs
 sudo docker-compose logs -f
+
+# Rebuild containers
+sudo docker-compose down
+sudo docker system prune -af
+sudo docker-compose build --no-cache
+sudo docker-compose up -d
 ```
 
-2. Verify ports are open:
+### 3. Nginx Issues
+If Nginx shows configuration errors:
 ```bash
-sudo netstat -tulpn | grep '3000\|80\|443'
-```
-
-3. Check Nginx configuration:
-```bash
+# Test configuration
 sudo nginx -t
+
+# Check logs
 sudo tail -f /var/log/nginx/error.log
 ```
 
-4. Restart services:
+### 4. Port Issues
+If ports are already in use:
 ```bash
-sudo systemctl restart vpn-manager
-sudo systemctl restart nginx
-sudo docker-compose restart
+# Check ports
+sudo netstat -tulpn | grep '3000\|80\|443'
+
+# Kill process using port (replace PORT with actual port number)
+sudo kill -9 $(sudo lsof -t -i:PORT)
 ```
 
-5. Clean installation:
+### 5. Clean Reinstall
+If you need to start fresh:
 ```bash
 # Stop all services
 sudo systemctl stop vpn-manager
@@ -207,5 +261,7 @@ sudo rm -rf /opt/vpn-manager
 - The application runs on port 3000 by default
 - Nginx proxies requests from port 80/443 to the application
 - Docker containers should be running alongside the Node.js application
+- Always use --legacy-peer-deps when installing npm packages to avoid dependency conflicts
+- The application uses Next.js 13 App Router (not pages)
 
 After completing all steps, your VPN Management System will be accessible at https://shire.marfanet.com
