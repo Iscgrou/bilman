@@ -142,19 +142,76 @@ openssl rand -base64 32
 openssl rand -base64 32
 ```
 
-4. **Database Migration**
+4. **Database Setup**
 ```bash
+# Install TypeScript dependencies for Prisma
+yarn add -D typescript ts-node @types/node
+
 # Generate Prisma client
 npx prisma generate
 
 # Run database migrations
 npx prisma migrate deploy
+```
 
-# Seed the database (if needed)
+5. **Database Seeding**
+First, create the seed file:
+```bash
+# Create prisma directory if it doesn't exist
+mkdir -p prisma
+
+# Create seed file
+cat > prisma/seed.ts << EOL
+import { PrismaClient } from '@prisma/client'
+import { hash } from 'bcryptjs'
+
+const prisma = new PrismaClient()
+
+async function main() {
+  // Create default admin user with hashed password
+  const hashedPassword = await hash('admin123', 12)
+  
+  const admin = await prisma.user.upsert({
+    where: { username: 'admin' },
+    update: {},
+    create: {
+      username: 'admin',
+      password: hashedPassword,
+      role: 'ADMIN',
+    },
+  })
+
+  console.log('Created admin user:', admin.username)
+}
+
+main()
+  .catch((e) => {
+    console.error(e)
+    process.exit(1)
+  })
+  .finally(async () => {
+    await prisma.$disconnect()
+  })
+EOL
+```
+
+Then, update package.json to add the seed configuration:
+```bash
+# Backup existing package.json
+cp package.json package.json.backup
+
+# Add prisma seed configuration
+sed -i '/"dependencies": {/i\  "prisma": {\n    "seed": "ts-node prisma/seed.ts"\n  },' package.json
+
+# Install bcryptjs for password hashing
+yarn add bcryptjs
+yarn add -D @types/bcryptjs
+
+# Now run the seed command
 npx prisma db seed
 ```
 
-5. **Build Application**
+6. **Build Application**
 ```bash
 # Build the application
 npm run build
