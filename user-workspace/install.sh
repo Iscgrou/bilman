@@ -36,12 +36,9 @@ echo "   VPN Management System - Quick Installation"
 echo "================================================"
 echo
 
-# Get domain name
-read -p "Enter your domain name (e.g., vpn.example.com): " DOMAIN_NAME
-if [ -z "$DOMAIN_NAME" ]; then
-    error "Domain name is required"
-    exit 1
-fi
+# Use provided domain name or prompt
+DOMAIN_NAME="shire.marfanet.com"
+echo "Using domain name: $DOMAIN_NAME"
 
 # Get admin credentials
 read -p "Enter admin username: " ADMIN_USER
