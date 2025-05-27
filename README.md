@@ -19,7 +19,9 @@ This will:
 
 ## Manual Installation
 
-If you prefer to install manually, follow these steps:
+### Production Installation
+
+If you prefer to install in production manually, follow these steps:
 
 1. Clone the repository:
 ```bash
@@ -31,6 +33,43 @@ cd /opt/vpn-manager
 ```bash
 sudo ./scripts/install.sh
 ```
+
+### Development Setup
+
+For local development:
+
+1. Clone the repository:
+```bash
+git clone https://github.com/Iscgrou/billi.git
+cd billi
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Start the development server:
+```bash
+npm run dev
+```
+
+4. Open your browser and navigate to:
+```
+http://localhost:3000
+```
+
+#### Development Login Credentials
+
+For testing purposes, you can use these credentials:
+
+- Admin User:
+  - Username: admin
+  - Password: admin123
+
+- Operator User:
+  - Username: operator
+  - Password: operator123
 
 ## System Updates
 

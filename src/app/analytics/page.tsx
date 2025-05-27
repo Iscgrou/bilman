@@ -16,14 +16,21 @@ import {
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
+interface AnalyticsData {
+  revenueByMonth: {
+    months: string[];
+    revenue: number[];
+  };
+}
+
 export default function AnalyticsDashboard() {
-  const [data, setData] = useState(null);
+  const [data, setData] = useState<AnalyticsData | null>(null);
   const [error, setError] = useState('');
 
   useEffect(() => {
     async function fetchAnalytics() {
       try {
-        const response = await axios.get('/api/analytics/kpis');
+        const response = await axios.get<AnalyticsData>('/api/analytics/kpis');
         setData(response.data);
       } catch (err) {
         setError('خطا در بارگذاری داده‌های تحلیلی');
@@ -36,16 +43,16 @@ export default function AnalyticsDashboard() {
     return <p className="text-red-600 text-center mt-4">{error}</p>;
   }
 
-  if (!data) {
+  if (!data || !('revenueByMonth' in data)) {
     return <p className="text-center mt-4">در حال بارگذاری...</p>;
   }
 
   const chartData = {
-    labels: data.months,
+    labels: data.revenueByMonth.months,
     datasets: [
       {
         label: 'فروش ماهانه',
-        data: data.monthlySales,
+        data: data.revenueByMonth.revenue,
         backgroundColor: 'rgba(0, 0, 0, 0.7)',
       },
     ],
