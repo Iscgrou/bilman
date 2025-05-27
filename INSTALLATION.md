@@ -168,9 +168,41 @@ First, create the seed file:
 # Create prisma directory if it doesn't exist
 mkdir -p prisma
 
+# Create tsconfig.json for TypeScript configuration
+cat > tsconfig.json << EOL
+{
+  "compilerOptions": {
+    "target": "es2017",
+    "module": "commonjs",
+    "lib": ["es2017", "esnext.asynciterable"],
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "moduleResolution": "node",
+    "removeComments": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "resolveJsonModule": true,
+    "baseUrl": "."
+  },
+  "exclude": ["node_modules"],
+  "include": ["./prisma/**/*.ts"]
+}
+EOL
+
 # Create seed file
 cat > prisma/seed.ts << EOL
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 import { hash } from 'bcryptjs';
 
 const prisma = new PrismaClient();
@@ -180,32 +212,35 @@ async function main() {
         // Create default admin user with hashed password
         const hashedPassword = await hash('admin123', 12);
         
+        // Define the admin user data
+        const adminData: Prisma.UserCreateInput = {
+            username: 'admin',
+            password: hashedPassword,
+            role: 'ADMIN',
+        };
+        
+        // Upsert the admin user
         const admin = await prisma.user.upsert({
-            where: { 
-                username: 'admin' 
-            },
+            where: { username: 'admin' },
             update: {},
-            create: {
-                username: 'admin',
-                password: hashedPassword,
-                role: 'ADMIN',
-            },
+            create: adminData,
         });
 
         console.log('Created admin user:', admin.username);
     } catch (error) {
         console.error('Error seeding database:', error);
         throw error;
+    } finally {
+        // Always disconnect from the database
+        await prisma.$disconnect();
     }
 }
 
+// Execute the seed function
 main()
     .catch((e) => {
-        console.error(e);
+        console.error('Error during seeding:', e);
         process.exit(1);
-    })
-    .finally(async () => {
-        await prisma.$disconnect();
     });
 EOL
 ```
