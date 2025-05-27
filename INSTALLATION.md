@@ -1,6 +1,18 @@
 # Enhanced Authentication System Installation Guide
 
-This guide explains how to install and set up the enhanced authentication system with role-based access control, CSRF protection, and improved security features.
+## Repository Information
+This project is hosted at: https://github.com/Iscgrou/bilman
+
+## Initial Setup on VPS
+
+1. **Clone the Repository**
+```bash
+# Clone the repository
+git clone https://github.com/Iscgrou/bilman.git
+
+# Navigate to project directory
+cd bilman
+```
 
 ## Prerequisites
 
@@ -12,7 +24,7 @@ This guide explains how to install and set up the enhanced authentication system
 
 1. **Install Dependencies**
 ```bash
-npm install csrf express-rate-limit jsonwebtoken bcryptjs nodemailer
+npm install
 ```
 
 2. **Environment Setup**
@@ -34,57 +46,14 @@ npx prisma migrate dev
 npx prisma db seed
 ```
 
-4. **File Structure**
-```
-src/
-├── app/
-│   ├── api/
-│   │   └── auth/
-│   │       ├── login/
-│   │       │   └── route.ts
-│   │       ├── logout/
-│   │       │   └── route.ts
-│   │       └── me/
-│   │           └── route.ts
-│   ├── dashboard/
-│   │   └── page.tsx
-│   └── login/
-│       └── page.tsx
-├── components/
-│   └── ui/
-│       └── sidebar.tsx
-├── contexts/
-│   └── AuthContext.tsx
-├── lib/
-│   ├── prisma.ts
-│   └── security.ts
-└── middleware.ts
-```
-
-5. **Security Configuration**
-The system includes:
-- CSRF protection
-- Rate limiting
-- HTTP-only cookies
-- Role-based access control
-- Secure session management
-
-## Usage
-
-1. **Start the Development Server**
+4. **Build and Start the Application**
 ```bash
-npm run dev
+# Build the application
+npm run build
+
+# Start in production mode
+npm start
 ```
-
-2. **Access the Application**
-- Login page: `http://localhost:3000/login`
-- Dashboard: `http://localhost:3000/dashboard`
-
-3. **Role-Based Access**
-The system supports three roles:
-- ADMIN: Full access to all features
-- OPERATOR: Access to dashboard, representatives, and invoices
-- REPRESENTATIVE: Access to dashboard and invoices only
 
 ## Security Features
 
@@ -109,85 +78,64 @@ The system supports three roles:
 - Dynamic navigation menu
 - Automatic redirects for unauthorized access
 
-## API Endpoints
+## Access and Usage
 
-1. **Login**
-```
-POST /api/auth/login
-Body: { username, password, rememberMe }
-```
+1. **Application Access**
+- Login page: `http://your-vps-ip-or-domain/login`
+- Dashboard: `http://your-vps-ip-or-domain/dashboard`
 
-2. **Logout**
-```
-POST /api/auth/logout
-```
-
-3. **Check Authentication**
-```
-GET /api/auth/me
-```
-
-## Error Handling
-
-The system includes comprehensive error handling for:
-- Invalid credentials
-- Expired sessions
-- CSRF token mismatches
-- Rate limit exceeded
-- Unauthorized access attempts
+2. **User Roles**
+- ADMIN: Full access to all features
+- OPERATOR: Access to dashboard, representatives, and invoices
+- REPRESENTATIVE: Access to dashboard and invoices only
 
 ## Maintenance
 
-1. **Session Cleanup**
-- JWT tokens expire automatically
-- No manual cleanup required
+1. **Updates and Maintenance**
+```bash
+# Pull latest changes
+git pull origin main
 
-2. **Security Updates**
-- Regularly update dependencies
-- Monitor security advisories
-- Update JWT_SECRET periodically
+# Install any new dependencies
+npm install
+
+# Rebuild the application
+npm run build
+
+# Restart the application
+npm start
+```
+
+2. **Database Maintenance**
+```bash
+# Apply any new migrations
+npx prisma migrate deploy
+
+# Update Prisma client
+npx prisma generate
+```
 
 ## Troubleshooting
 
-1. **CSRF Token Issues**
-- Ensure cookies are enabled
-- Check for proper token transmission
-- Verify cookie domains
+1. **Common Issues**
+- Database connection errors: Check DATABASE_URL in .env
+- Authentication failures: Verify JWT_SECRET
+- Permission issues: Check user role assignments
 
-2. **Authentication Failures**
-- Verify database connection
-- Check JWT_SECRET configuration
-- Confirm user credentials
-
-3. **Role-Based Access Issues**
-- Verify user role assignments
-- Check route protection configuration
-- Review middleware settings
-
-## Best Practices
-
-1. **Security**
-- Use strong JWT secrets
-- Enable HTTPS in production
-- Regular security audits
-- Monitor failed login attempts
-
-2. **Performance**
-- Implement caching where appropriate
-- Optimize database queries
-- Monitor response times
-
-3. **Maintenance**
-- Regular dependency updates
-- Log monitoring
-- Database backups
-- Documentation updates
+2. **Logs**
+```bash
+# View application logs
+pm2 logs # if using PM2
+# or
+npm run dev # for development mode with logs
+```
 
 ## Support
 
 For issues and support:
-1. Check the troubleshooting guide
-2. Review error logs
-3. Contact system administrator
+1. Check the troubleshooting section above
+2. Review application logs
+3. Visit the repository: https://github.com/Iscgrou/bilman
+4. Contact system administrator
 
 This authentication system provides a secure, scalable, and maintainable solution for user authentication and authorization.
