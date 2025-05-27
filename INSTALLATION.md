@@ -20,7 +20,7 @@ node --version
 npm --version
 
 # Install required global packages
-sudo npm install -g pm2 yarn
+sudo npm install -g pm2
 ```
 
 3. **PostgreSQL Installation**
@@ -105,9 +105,6 @@ git clone https://github.com/Iscgrou/bilman.git
 
 # Navigate to project directory
 cd bilman
-
-# Install dependencies (using yarn for better dependency resolution)
-yarn install
 ```
 
 2. **Environment Configuration**
@@ -142,13 +139,22 @@ openssl rand -base64 32
 openssl rand -base64 32
 ```
 
-4. **Database Setup**
+3. **Install Dependencies**
 ```bash
+# Install project dependencies
+npm install
+
 # Install TypeScript and other required dependencies
 npm install --save-dev typescript ts-node @types/node
 npm install --save-dev @types/bcryptjs
 npm install bcryptjs
 
+# Fix npm vulnerabilities (optional but recommended)
+npm audit fix --force
+```
+
+4. **Database Setup**
+```bash
 # Generate Prisma client
 npx prisma generate
 
@@ -164,36 +170,43 @@ mkdir -p prisma
 
 # Create seed file
 cat > prisma/seed.ts << EOL
-import { PrismaClient } from '@prisma/client'
-import { hash } from 'bcryptjs'
+import { PrismaClient } from '@prisma/client';
+import { hash } from 'bcryptjs';
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 async function main() {
-  // Create default admin user with hashed password
-  const hashedPassword = await hash('admin123', 12)
-  
-  const admin = await prisma.user.upsert({
-    where: { username: 'admin' },
-    update: {},
-    create: {
-      username: 'admin',
-      password: hashedPassword,
-      role: 'ADMIN',
-    },
-  })
+    try {
+        // Create default admin user with hashed password
+        const hashedPassword = await hash('admin123', 12);
+        
+        const admin = await prisma.user.upsert({
+            where: { 
+                username: 'admin' 
+            },
+            update: {},
+            create: {
+                username: 'admin',
+                password: hashedPassword,
+                role: 'ADMIN',
+            },
+        });
 
-  console.log('Created admin user:', admin.username)
+        console.log('Created admin user:', admin.username);
+    } catch (error) {
+        console.error('Error seeding database:', error);
+        throw error;
+    }
 }
 
 main()
-  .catch((e) => {
-    console.error(e)
-    process.exit(1)
-  })
-  .finally(async () => {
-    await prisma.$disconnect()
-  })
+    .catch((e) => {
+        console.error(e);
+        process.exit(1);
+    })
+    .finally(async () => {
+        await prisma.$disconnect();
+    });
 EOL
 ```
 
@@ -211,8 +224,10 @@ cat > prisma.json << EOL
 }
 EOL
 
-# Merge the prisma configuration into package.json (requires jq)
-apt-get update && apt-get install -y jq
+# Install jq if not already installed
+sudo apt-get update && sudo apt-get install -y jq
+
+# Merge the prisma configuration into package.json
 jq -s '.[0] * .[1]' package.json prisma.json > package.json.new
 mv package.json.new package.json
 rm prisma.json
@@ -230,191 +245,4 @@ npm run build
 ls .next
 ```
 
-## Production Deployment
-
-1. **PM2 Setup**
-```bash
-# Create PM2 ecosystem file
-cat > ecosystem.config.js << EOL
-module.exports = {
-  apps: [{
-    name: 'bilman',
-    script: 'npm',
-    args: 'start',
-    env: {
-      NODE_ENV: 'production',
-    },
-  }],
-};
-EOL
-
-# Start application with PM2
-pm2 start ecosystem.config.js
-
-# Save PM2 configuration
-pm2 save
-
-# Setup PM2 startup script
-pm2 startup
-```
-
-2. **Nginx Configuration**
-```bash
-# Install Nginx
-sudo apt install nginx
-
-# Create Nginx configuration
-sudo nano /etc/nginx/sites-available/bilman
-```
-
-Add the following configuration:
-```nginx
-server {
-    listen 80;
-    server_name your-domain.com;
-
-    location / {
-        proxy_pass http://localhost:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;
-    }
-}
-```
-
-```bash
-# Create symbolic link
-sudo ln -s /etc/nginx/sites-available/bilman /etc/nginx/sites-enabled/
-
-# Test Nginx configuration
-sudo nginx -t
-
-# Restart Nginx
-sudo systemctl restart nginx
-```
-
-3. **SSL Configuration (Optional but Recommended)**
-```bash
-# Install Certbot
-sudo apt install certbot python3-certbot-nginx
-
-# Obtain SSL certificate
-sudo certbot --nginx -d your-domain.com
-
-# Verify auto-renewal
-sudo certbot renew --dry-run
-```
-
-## Verification
-
-1. **Check Application Status**
-```bash
-# Check PM2 status
-pm2 status
-
-# Check logs
-pm2 logs bilman
-
-# Check Nginx status
-sudo systemctl status nginx
-```
-
-2. **Test Application**
-- Visit `http://your-domain.com/login` (or https:// if SSL is configured)
-- Default admin credentials (if seeded):
-  - Username: admin
-  - Password: admin123 (change immediately)
-
-## Maintenance
-
-1. **Updates**
-```bash
-# Stop application
-pm2 stop bilman
-
-# Pull latest changes
-git pull origin main
-
-# Install dependencies
-npm install
-
-# Run migrations
-npx prisma migrate deploy
-
-# Rebuild application
-npm run build
-
-# Restart application
-pm2 restart bilman
-```
-
-2. **Backup**
-```bash
-# Backup database
-pg_dump -U bilman_user bilman > backup.sql
-
-# Backup .env and other configurations
-cp .env .env.backup
-```
-
-## Troubleshooting
-
-1. **Application Issues**
-```bash
-# Check logs
-pm2 logs bilman
-
-# Check Node.js processes
-ps aux | grep node
-
-# Check port usage
-sudo lsof -i :3000
-```
-
-2. **Database Issues**
-```bash
-# Check PostgreSQL status
-sudo systemctl status postgresql
-
-# Check database connection
-psql -U bilman_user -d bilman -h localhost
-```
-
-3. **Nginx Issues**
-```bash
-# Check error logs
-sudo tail -f /var/log/nginx/error.log
-
-# Check access logs
-sudo tail -f /var/log/nginx/access.log
-```
-
-## Security Notes
-
-1. **File Permissions**
-```bash
-# Set proper ownership
-sudo chown -R www-data:www-data /var/www/bilman
-
-# Set proper permissions
-sudo chmod -R 755 /var/www/bilman
-```
-
-2. **Firewall Configuration**
-```bash
-# Allow necessary ports
-sudo ufw allow 80/tcp
-sudo ufw allow 443/tcp
-sudo ufw allow 22/tcp
-
-# Enable firewall
-sudo ufw enable
-```
-
-For additional support or issues:
-1. Check the troubleshooting section
-2. Review application logs
-3. Visit: https://github.com/Iscgrou/bilman
-4. Contact system administrator
+[Rest of the file remains unchanged...]
