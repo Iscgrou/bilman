@@ -202,7 +202,7 @@ EOL
 
 # Create seed file
 cat > prisma/seed.ts << EOL
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, UserRole } from '@prisma/client';
 import { hash } from 'bcryptjs';
 
 const prisma = new PrismaClient();
@@ -217,16 +217,23 @@ async function main() {
             where: { 
                 username: 'admin' 
             },
-            update: {},
+            update: {
+                password: hashedPassword,
+                role: UserRole.ADMIN
+            },
             create: {
                 username: 'admin',
                 password: hashedPassword,
-                role: 'ADMIN'
+                role: UserRole.ADMIN
             }
         });
 
         console.log('Database seeded successfully');
-        console.log('Admin user created:', admin.username);
+        console.log('Admin user created:', {
+            id: admin.id,
+            username: admin.username,
+            role: admin.role
+        });
     } catch (error) {
         console.error('Error seeding database:', error);
         throw error;
@@ -237,7 +244,7 @@ async function main() {
 
 main()
     .catch((error) => {
-        console.error(error);
+        console.error('Error during seeding:', error);
         process.exit(1);
     });
 EOL
