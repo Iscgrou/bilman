@@ -202,7 +202,7 @@ EOL
 
 # Create seed file
 cat > prisma/seed.ts << EOL
-import { PrismaClient, Prisma } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { hash } from 'bcryptjs';
 
 const prisma = new PrismaClient();
@@ -212,34 +212,32 @@ async function main() {
         // Create default admin user with hashed password
         const hashedPassword = await hash('admin123', 12);
         
-        // Define the admin user data
-        const adminData: Prisma.UserCreateInput = {
-            username: 'admin',
-            password: hashedPassword,
-            role: 'ADMIN',
-        };
-        
-        // Upsert the admin user
+        // Create or update admin user
         const admin = await prisma.user.upsert({
-            where: { username: 'admin' },
+            where: { 
+                username: 'admin' 
+            },
             update: {},
-            create: adminData,
+            create: {
+                username: 'admin',
+                password: hashedPassword,
+                role: 'ADMIN'
+            }
         });
 
-        console.log('Created admin user:', admin.username);
+        console.log('Database seeded successfully');
+        console.log('Admin user created:', admin.username);
     } catch (error) {
         console.error('Error seeding database:', error);
         throw error;
     } finally {
-        // Always disconnect from the database
         await prisma.$disconnect();
     }
 }
 
-// Execute the seed function
 main()
-    .catch((e) => {
-        console.error('Error during seeding:', e);
+    .catch((error) => {
+        console.error(error);
         process.exit(1);
     });
 EOL
