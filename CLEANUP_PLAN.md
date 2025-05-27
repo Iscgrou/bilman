@@ -1,179 +1,116 @@
-# Cleanup Plan
+# Repository Cleanup Plan
 
-## 1. Files to Keep
+## Files to Remove
 
-### Core App Files
-```
-src/
-├── app/
-│   ├── layout.tsx              # Main layout with RTL and i18n support
-│   ├── page.tsx               # Dashboard page
-│   ├── login/                 # Authentication
-│   │   └── page.tsx
-│   ├── representatives/       # Representative management
-│   │   ├── page.tsx
-│   │   ├── [id]/
-│   │   │   ├── page.tsx
-│   │   │   └── payments/
-│   │   └── referral/
-│   ├── invoices/             # Invoice management
-│   │   ├── page.tsx
-│   │   └── status/
-│   └── analytics/            # Analytics dashboard
-│       └── page.tsx
-```
+1. Unused Configuration Files
+   - [ ] Remove any old `.env` files
+   - [ ] Remove any test configuration files
+   - [ ] Clean up duplicate configuration files
 
-### Essential Components
-```
-src/
-├── components/
-│   ├── ui/
-│   │   ├── button.tsx        # Base button component
-│   │   ├── input.tsx         # Form inputs
-│   │   ├── select.tsx        # Dropdowns
-│   │   ├── table.tsx         # Data tables
-│   │   ├── card.tsx          # Card containers
-│   │   ├── dialog.tsx        # Modal dialogs
-│   │   ├── form.tsx          # Form handling
-│   │   ├── sidebar.tsx       # Navigation
-│   │   └── chart.tsx         # Analytics charts
-│   └── i18n-provider.tsx     # Language provider
-```
+2. Development Files
+   - [ ] Remove any `.log` files
+   - [ ] Clean up any temporary development files
+   - [ ] Remove unused test files
 
-### Core Utilities
-```
-src/
-├── lib/
-│   ├── auth.ts               # Authentication utilities
-│   ├── db.ts                # Database client
-│   ├── i18n.ts              # i18n configuration
-│   ├── roles.ts             # Role definitions
-│   └── utils.ts             # Common utilities
-```
+3. Legacy Code
+   - [ ] Remove deprecated components
+   - [ ] Clean up unused API routes
+   - [ ] Remove old migration files
 
-### API Routes
-```
-src/
-├── app/
-│   └── api/
-│       ├── auth/
-│       │   └── login/
-│       ├── representatives/
-│       ├── invoices/
-│       └── analytics/
-```
+## Files to Keep
 
-## 2. Files to Remove
+1. Core Application Files
+   ```
+   ├── src/
+   │   ├── app/             # Next.js 13 app directory
+   │   ├── components/      # UI components
+   │   ├── contexts/        # React contexts
+   │   └── lib/            # Utilities
+   ```
 
-### Unused UI Components
-- accordion.tsx
-- alert-dialog.tsx
-- aspect-ratio.tsx
-- avatar.tsx
-- breadcrumb.tsx
-- carousel.tsx
-- collapsible.tsx
-- command.tsx
-- context-menu.tsx
-- drawer.tsx
-- hover-card.tsx
-- menubar.tsx
-- navigation-menu.tsx
-- popover.tsx
-- progress.tsx
-- radio-group.tsx
-- resizable.tsx
-- scroll-area.tsx
-- separator.tsx
-- sheet.tsx
-- skeleton.tsx
-- slider.tsx
-- sonner.tsx
-- switch.tsx
-- tabs.tsx
-- textarea.tsx
-- toggle-group.tsx
-- toggle.tsx
-- tooltip.tsx
+2. Essential Configuration
+   ```
+   ├── prisma/
+   │   ├── schema.prisma    # Database schema
+   │   └── migrations/      # Active migrations
+   ├── .env.example         # Environment template
+   ├── tsconfig.json        # TypeScript config
+   ├── package.json         # Dependencies
+   └── docker-compose.yml   # Docker config
+   ```
 
-## 3. New Files to Create
+3. Documentation
+   ```
+   ├── README.md           # Project overview
+   ├── INSTALLATION.md     # Setup guide
+   └── LICENSE            # MIT license
+   ```
 
-### Database
-```
-prisma/
-├── schema.prisma            # Database schema
-└── migrations/              # Database migrations
-```
+## Cleanup Steps
 
-### Types
-```
-src/
-└── types/
-    ├── representative.ts    # Representative types
-    ├── invoice.ts          # Invoice types
-    ├── payment.ts          # Payment types
-    └── api.ts              # API types
-```
+1. Backup Current State
+   ```bash
+   git checkout -b backup/cleanup-$(date +%Y%m%d)
+   ```
 
-### Services
-```
-src/
-└── services/
-    ├── auth.service.ts     # Authentication service
-    ├── rep.service.ts      # Representative service
-    ├── invoice.service.ts  # Invoice service
-    └── telegram.service.ts # Telegram bot service
-```
+2. Remove Unnecessary Files
+   ```bash
+   # Remove unused files
+   git rm [list-of-files]
+   
+   # Remove from git but keep locally
+   git rm --cached [list-of-files]
+   ```
 
-## 4. Configuration Files
+3. Update .gitignore
+   ```
+   # Add patterns for files to ignore
+   *.log
+   .env*
+   !.env.example
+   .DS_Store
+   ```
 
-### Development
-```
-.
-├── .eslintrc.js           # ESLint configuration
-├── .prettierrc           # Prettier configuration
-├── jest.config.js        # Jest configuration
-├── tsconfig.json         # TypeScript configuration
-└── docker-compose.yml    # Docker configuration
-```
+4. Clean Git History (Optional)
+   ```bash
+   # Remove old branches
+   git branch -D [old-branches]
+   
+   # Clean up remote
+   git remote prune origin
+   ```
 
-## 5. Action Items
+## Post-Cleanup Verification
 
-1. Clean Dependencies
-- Remove unused Radix UI packages
-- Add required production dependencies
-- Update development dependencies
+1. Test Application
+   - [ ] Verify all features work
+   - [ ] Check database migrations
+   - [ ] Test authentication system
+   - [ ] Verify API endpoints
 
-2. Setup Development Environment
-- Configure ESLint and Prettier
-- Set up Husky pre-commit hooks
-- Configure Jest and Testing Library
+2. Documentation Update
+   - [ ] Update README.md
+   - [ ] Update INSTALLATION.md
+   - [ ] Add migration notes if needed
 
-3. Database Setup
-- Initialize Prisma
-- Create initial schema
-- Set up migrations
+3. Deployment Check
+   - [ ] Test Docker build
+   - [ ] Verify production deployment
+   - [ ] Check backup systems
 
-4. Documentation
-- Update README.md
-- Create API documentation
-- Add development guides
+## Next Steps
 
-## 6. Testing Strategy
+1. Code Quality
+   - [ ] Run linter on cleaned codebase
+   - [ ] Update TypeScript types
+   - [ ] Add missing documentation
 
-1. Unit Tests
-- Authentication flows
-- Data validation
-- Utility functions
+2. Security
+   - [ ] Review dependencies
+   - [ ] Update security configurations
+   - [ ] Check access controls
 
-2. Integration Tests
-- API endpoints
-- Database operations
-- Service interactions
-
-3. E2E Tests
-- User flows
-- Representative management
-- Invoice processing
-
-This cleanup will provide a solid foundation for implementing the core features while maintaining code quality and performance.
+3. Performance
+   - [ ] Review bundle size
+   - [ ] Check database queries
+   - [ ] Optimize API routes
