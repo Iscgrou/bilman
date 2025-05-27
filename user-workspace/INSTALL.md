@@ -60,16 +60,24 @@ DOMAIN=shire.marfanet.com
 NODE_ENV=production
 EOL
 
-# Install dependencies and build
+# Install dependencies
 cd /opt/vpn-manager
 sudo npm install
-sudo npm run build
 
-# Start Docker containers
+# Build the application
+sudo npm run build
+```
+
+### 5. Docker Setup
+
+```bash
+# Build and start Docker containers
+cd /opt/vpn-manager
+sudo docker-compose build
 sudo docker-compose up -d
 ```
 
-### 5. Configure Nginx
+### 6. Configure Nginx
 
 ```bash
 # Create Nginx configuration
@@ -95,14 +103,14 @@ sudo rm -f /etc/nginx/sites-enabled/default
 sudo nginx -t && sudo systemctl restart nginx
 ```
 
-### 6. SSL Configuration
+### 7. SSL Configuration
 
 ```bash
 # Setup SSL with Certbot
 sudo certbot --nginx -d shire.marfanet.com --non-interactive --agree-tos --email admin@shire.marfanet.com --redirect
 ```
 
-### 7. Service Configuration
+### 8. Service Configuration
 
 ```bash
 # Create systemd service
@@ -129,13 +137,6 @@ sudo systemctl enable vpn-manager
 sudo systemctl start vpn-manager
 ```
 
-### 8. Setup Daily Backups
-
-```bash
-# Configure backup cron job
-(sudo crontab -l 2>/dev/null; echo "0 2 * * * /opt/vpn-manager/scripts/backup.sh") | sudo crontab -
-```
-
 ### 9. Verify Installation
 
 ```bash
@@ -151,11 +152,12 @@ sudo journalctl -u vpn-manager -f
 
 ## Troubleshooting
 
-If you encounter a 502 Bad Gateway error:
+If you encounter issues:
 
-1. Check service status:
+1. Check if Node.js application is running:
 ```bash
 sudo systemctl status vpn-manager
+sudo journalctl -u vpn-manager -f
 ```
 
 2. Check Docker containers:
@@ -170,15 +172,23 @@ sudo nginx -t
 sudo tail -f /var/log/nginx/error.log
 ```
 
-4. Restart services:
+4. Verify ports are open:
+```bash
+sudo netstat -tulpn | grep '3000\|80\|443'
+```
+
+5. Restart services:
 ```bash
 sudo systemctl restart vpn-manager
 sudo systemctl restart nginx
+sudo docker-compose restart
 ```
 
 ## Important Notes
 - Ensure your domain DNS (shire.marfanet.com) points to your server's IP address
 - Keep your credentials and environment variables secure
-- Regularly update the system using: `sudo /opt/vpn-manager/scripts/update.sh`
+- The application runs on port 3000 by default
+- Nginx proxies requests from port 80/443 to the application
+- Docker containers should be running alongside the Node.js application
 
 After completing all steps, your VPN Management System will be accessible at https://shire.marfanet.com
