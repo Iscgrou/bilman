@@ -144,8 +144,10 @@ openssl rand -base64 32
 
 4. **Database Setup**
 ```bash
-# Install TypeScript dependencies for Prisma
-yarn add --dev typescript ts-node @types/node
+# Install TypeScript and other required dependencies
+npm install --save-dev typescript ts-node @types/node
+npm install --save-dev @types/bcryptjs
+npm install bcryptjs
 
 # Generate Prisma client
 npx prisma generate
@@ -200,12 +202,20 @@ Then, update package.json to add the seed configuration:
 # Backup existing package.json
 cp package.json package.json.backup
 
-# Add prisma seed configuration
-sed -i '/"dependencies": {/i\  "prisma": {\n    "seed": "ts-node prisma/seed.ts"\n  },' package.json
+# Create a temporary file with the prisma configuration
+cat > prisma.json << EOL
+{
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  }
+}
+EOL
 
-# Install bcryptjs and its types
-yarn add bcryptjs
-yarn add --dev @types/bcryptjs
+# Merge the prisma configuration into package.json (requires jq)
+apt-get update && apt-get install -y jq
+jq -s '.[0] * .[1]' package.json prisma.json > package.json.new
+mv package.json.new package.json
+rm prisma.json
 
 # Now run the seed command
 npx prisma db seed
