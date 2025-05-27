@@ -11,13 +11,16 @@ lsb_release -a
 
 2. **Node.js Installation**
 ```bash
-# Install Node.js 16.x or later
-curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+# Install Node.js 18.x (recommended for Next.js 13+)
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
 sudo apt-get install -y nodejs
 
-# Verify installation
+# Verify installation (should show v18.x.x)
 node --version
 npm --version
+
+# Install required global packages
+sudo npm install -g pm2 yarn
 ```
 
 3. **PostgreSQL Installation**
@@ -85,9 +88,16 @@ psql -U bilman_user -h localhost -d bilman
 
 ## Project Installation
 
-1. **Clone Repository**
+1. **Prepare Installation Directory**
 ```bash
-# Navigate to desired directory
+# Create www directory if it doesn't exist
+sudo mkdir -p /var/www
+
+# Set proper permissions
+sudo chown -R $USER:$USER /var/www
+sudo chmod -R 755 /var/www
+
+# Navigate to directory
 cd /var/www
 
 # Clone the repository
@@ -95,18 +105,12 @@ git clone https://github.com/Iscgrou/bilman.git
 
 # Navigate to project directory
 cd bilman
+
+# Install dependencies (using yarn for better dependency resolution)
+yarn install
 ```
 
-2. **Install Dependencies**
-```bash
-# Install project dependencies
-npm install
-
-# Install global dependencies
-npm install -g pm2
-```
-
-3. **Environment Configuration**
+2. **Environment Configuration**
 ```bash
 # Create and edit .env file
 nano .env
