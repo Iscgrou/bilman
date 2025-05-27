@@ -108,24 +108,34 @@ npm install -g pm2
 
 3. **Environment Configuration**
 ```bash
-# Create .env file
-cp .env.example .env
-
-# Edit .env file with your settings
+# Create and edit .env file
 nano .env
 ```
 
-Add the following to your `.env` file:
+Add the following configuration to your `.env` file (replace the values with your actual configuration):
 ```env
 # Database configuration
-DATABASE_URL="postgresql://bilman_user:your_secure_password@localhost:5432/bilman"
+DATABASE_URL="postgresql://bilman_user:your_actual_password@localhost:5432/bilman"
 
-# JWT configuration
-JWT_SECRET="your-secure-jwt-secret"
+# JWT configuration (generate a secure random string)
+JWT_SECRET="generate-a-secure-random-string-here"
 
 # Application configuration
 NODE_ENV="production"
 PORT=3000
+
+# Optional: Additional security settings
+NEXTAUTH_URL="https://your-domain.com"  # Replace with your domain
+NEXTAUTH_SECRET="generate-another-secure-random-string"  # For NextAuth.js
+```
+
+To generate secure random strings for secrets:
+```bash
+# Generate random string for JWT_SECRET
+openssl rand -base64 32
+
+# Generate random string for NEXTAUTH_SECRET
+openssl rand -base64 32
 ```
 
 4. **Database Migration**
