@@ -35,22 +35,52 @@ psql --version
 
 ## PostgreSQL Database Setup
 
-1. **Create Database and User**
+1. **Switch to postgres user**
 ```bash
-# Access PostgreSQL
-sudo -u postgres psql
+# Switch to postgres user
+sudo su - postgres
+
+# Now you're in postgres user shell
+```
+
+2. **Create Database and User**
+```bash
+# Start PostgreSQL command prompt
+psql
+
+# Once you see 'postgres=#', run these commands one by one:
 
 # Create database
 CREATE DATABASE bilman;
 
-# Create user and set password
+# Create user and set password (replace with your actual password)
 CREATE USER bilman_user WITH ENCRYPTED PASSWORD 'your_secure_password';
 
 # Grant privileges
 GRANT ALL PRIVILEGES ON DATABASE bilman TO bilman_user;
 
+# Connect to the bilman database
+\c bilman
+
+# Grant schema privileges to the user
+GRANT ALL ON SCHEMA public TO bilman_user;
+
+# Verify the user and database
+\du  # List users
+\l   # List databases
+
 # Exit PostgreSQL
 \q
+
+# Exit postgres user shell
+exit
+```
+
+3. **Test Database Connection**
+```bash
+# Test connection with the new user
+psql -U bilman_user -h localhost -d bilman
+# Enter your password when prompted
 ```
 
 ## Project Installation
