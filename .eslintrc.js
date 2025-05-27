@@ -1,40 +1,37 @@
-module.exports = {
-  root: true,
-  parser: '@typescript-eslint/parser',
-  plugins: ['@typescript-eslint', 'react', 'react-hooks', 'jest'],
-  extends: [
+      extends: ['plugin:testing-library/react']
+      files: ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)'],
+      version: 'detect'
+    '@typescript-eslint/explicit-module-boundary-types': 'off',
+    '@typescript-eslint/no-explicit-any': 'error',
+    '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
     'eslint:recommended',
-    'plugin:@typescript-eslint/recommended',
-    'plugin:react/recommended',
-    'plugin:react-hooks/recommended',
-    'plugin:jest/recommended',
     'next/core-web-vitals',
+    'no-console': ['warn', { allow: ['warn', 'error'] }]
+    'plugin:@typescript-eslint/recommended',
+    'plugin:jest/recommended',
+    'plugin:react-hooks/recommended',
+    'plugin:react/recommended',
     'prettier'
-  ],
-  env: {
+    'react-hooks/exhaustive-deps': 'warn',
+    'react-hooks/rules-of-hooks': 'error',
+    'react/react-in-jsx-scope': 'off',
     browser: true,
     es2021: true,
-    node: true,
     jest: true
-  },
-  settings: {
+    node: true,
     react: {
-      version: 'detect'
-    }
-  },
-  rules: {
-    'react/react-in-jsx-scope': 'off',
-    '@typescript-eslint/explicit-module-boundary-types': 'off',
-    '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-    '@typescript-eslint/no-explicit-any': 'error',
-    'react-hooks/rules-of-hooks': 'error',
-    'react-hooks/exhaustive-deps': 'warn',
-    'no-console': ['warn', { allow: ['warn', 'error'] }]
-  },
-  overrides: [
     {
-      files: ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)'],
-      extends: ['plugin:testing-library/react']
     }
   ]
+  ],
+  env: {
+  extends: [
+  overrides: [
+  parser: '@typescript-eslint/parser',
+  plugins: ['@typescript-eslint', 'react', 'react-hooks', 'jest'],
+  root: true,
+  rules: {
+  settings: {
+  },
+module.exports = {
 }
