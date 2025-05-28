@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
-import { prisma } from '@/lib/prisma'
-import { sign } from 'jsonwebtoken'
-import { generateCsrfToken, verifyCsrfToken, rateLimitMiddleware } from '@/lib/security'
+import { prisma } from 'src/lib/prisma'
+import { SignJWT } from 'jose'
+import { generateCsrfToken, verifyCsrfToken, rateLimitMiddleware } from 'src/lib/security'
 
 export async function POST(request: Request) {
   // Check rate limiting
@@ -43,20 +43,20 @@ export async function POST(request: Request) {
       )
     }
 
-    // Create JWT token with dynamic expiration
+    // Create JWT token with dynamic expiration using jose
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback-secret')
     const expiresIn = rememberMe ? '30d' : '1d'
-    const token = sign(
-      { 
-        id: user.id, 
-        username: user.username,
-        role: user.role 
-      },
-      process.env.JWT_SECRET || 'fallback-secret',
-      { expiresIn }
-    )
+    const token = await new SignJWT({ 
+      id: user.id, 
+      username: user.username,
+      role: user.role 
+    })
+      .setProtectedHeader({ alg: 'HS256' })
+      .setExpirationTime(expiresIn)
+      .sign(secret)
 
     // Generate new CSRF token for the session
-    const { secret: newSecret, token: newCsrfToken } = generateCsrfToken()
+    const { secret: newSecret, token: newCsrfToken } = await generateCsrfToken()
 
     const response = NextResponse.json(
       { 

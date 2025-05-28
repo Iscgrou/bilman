@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { verifyCsrfToken } from '@/lib/security'
+import { verifyCsrfToken } from 'src/lib/security'
 
 export async function POST(request: Request) {
   try {

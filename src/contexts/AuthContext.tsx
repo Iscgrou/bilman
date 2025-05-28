@@ -27,6 +27,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const [csrfToken, setCsrfToken] = useState<string | null>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -37,12 +38,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const res = await fetch('/api/auth/me', {
         headers: {
-          'x-csrf-token': localStorage.getItem('csrfToken') || '',
+          'x-csrf-token': csrfToken || '',
         },
+        credentials: 'include',
       })
       if (res.ok) {
         const userData = await res.json()
         setUser(userData)
+        setCsrfToken(userData.csrfToken)
       }
     } catch (error) {
       console.error('Error checking user:', error)
@@ -56,10 +59,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
-        'x-csrf-token': localStorage.getItem('csrfToken') || '',
-        'x-csrf-secret': localStorage.getItem('csrfSecret') || '',
+        'x-csrf-token': csrfToken || '',
       },
       body: JSON.stringify({ username, password, rememberMe }),
+      credentials: 'include',
     })
 
     if (!res.ok) {
@@ -68,7 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     const data = await res.json()
-    localStorage.setItem('csrfToken', data.csrfToken)
+    setCsrfToken(data.csrfToken)
     setUser(data.user)
     router.push('/dashboard')
   }
@@ -78,12 +81,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await fetch('/api/auth/logout', {
         method: 'POST',
         headers: {
-          'x-csrf-token': localStorage.getItem('csrfToken') || '',
+          'x-csrf-token': csrfToken || '',
         },
+        credentials: 'include',
       })
       setUser(null)
-      localStorage.removeItem('csrfToken')
-      localStorage.removeItem('csrfSecret')
+      setCsrfToken(null)
       router.push('/login')
     } catch (error) {
       console.error('Logout error:', error)

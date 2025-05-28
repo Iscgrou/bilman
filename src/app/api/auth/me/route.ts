@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
-import { verify } from 'jsonwebtoken'
+import { jwtVerify } from 'jose'
 import { cookies } from 'next/headers'
-import { prisma } from '@/lib/prisma'
-import { verifyCsrfToken, generateCsrfToken } from '@/lib/security'
+import { prisma } from 'src/lib/prisma'
+import { verifyCsrfToken, generateCsrfToken } from 'src/lib/security'
 
 export async function GET(request: Request) {
   try {
@@ -27,15 +27,13 @@ export async function GET(request: Request) {
       )
     }
 
-    // Verify JWT token
-    const decoded = verify(
-      token,
-      process.env.JWT_SECRET || 'fallback-secret'
-    ) as { id: string }
+    // Verify JWT token using jose
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback-secret')
+    const { payload } = await jwtVerify(token, secret)
 
     // Get user from database
     const user = await prisma.user.findUnique({
-      where: { id: decoded.id },
+      where: { id: payload.id as string },
       select: {
         id: true,
         username: true,
@@ -53,7 +51,7 @@ export async function GET(request: Request) {
     }
 
     // Generate new CSRF token
-    const { secret: newSecret, token: newCsrfToken } = generateCsrfToken()
+    const { secret: newSecret, token: newCsrfToken } = await generateCsrfToken()
 
     const response = NextResponse.json({
       ...user,

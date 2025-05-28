@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { verify } from 'jsonwebtoken'
-import { verifyCsrfToken } from '@/lib/security'
+import { jwtVerify } from 'jose'
+import { verifyCsrfToken } from './lib/security'
 
 interface JWTPayload {
   id: string
@@ -49,11 +49,9 @@ export async function middleware(request: NextRequest) {
   // For protected routes, verify token and check role-based access
   if (isProtectedRoute && token) {
     try {
-      // Verify JWT token
-      const decoded = verify(
-        token,
-        process.env.JWT_SECRET || 'fallback-secret'
-      ) as JWTPayload
+      // Verify JWT token using jose (Edge Runtime compatible)
+      const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback-secret')
+      const { payload } = await jwtVerify(token, secret) as { payload: JWTPayload }
 
       // Check CSRF token for API routes
       if (pathname.startsWith('/api/')) {
@@ -70,7 +68,7 @@ export async function middleware(request: NextRequest) {
 
       // Check role-based access
       const routeRoles = routeAccess[pathname as keyof typeof routeAccess]
-      if (routeRoles && !routeRoles.includes(decoded.role)) {
+      if (routeRoles && !routeRoles.includes(payload.role)) {
         // Redirect to dashboard if user doesn't have access
         return NextResponse.redirect(new URL('/dashboard', request.url))
       }
